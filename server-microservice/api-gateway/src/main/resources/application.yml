@@ -1,0 +1,72 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: API-GATEWAY
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/
+  tracing:
+    enabled: true
+    sampler:
+      probability: 1.0
+  cloud:
+    gateway:
+      routes:
+        - id: COURSE-SERVICE
+          uri: lb://COURSE-SERVICE
+          predicates:
+            - Path=/api/courses/**
+        - id: CATEGORY-SERVICE
+          uri: lb://CATEGORY-SERVICE
+          predicates:
+            - Path=/api/categories/**
+        - id: MUX-SERVICE
+          uri: lb://MUX-SERVICE
+          predicates:
+            - Path=/api/mux-data/**
+        - id: USER-PROGRESS-SERVICE
+          uri: lb://USER-PROGRESS-SERVICE
+          predicates:
+            - Path=/api/user-progress/**
+        - id: CHAPTER-SERVICE
+          uri: lb://CHAPTER-SERVICE
+          predicates:
+            - Path=/api/chapters/**
+        - id: ATTACHMENT-SERVICE
+          uri: lb://ATTACHMENT-SERVICE
+          predicates:
+            - Path=/api/attachments/**
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedHeaders: "*"
+            allowedMethods:
+              - "GET"
+              - "POST"
+              - "PATCH"
+              - "PUT"
+              - "DELETE"
+              - "OPTIONS"
+        default-filters:
+          - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    instance:
+      hostname: localhost
